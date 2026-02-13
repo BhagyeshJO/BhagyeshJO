@@ -1,50 +1,55 @@
-# Habit Tracker (Local-First)
+# Habit Tracker (Windows Desktop App)
 
-A production-structured, dependency-free habit tracking web app.
+A local-first habit tracker you can run as an installable Windows desktop app.
 
-## Features
+## What you get
 
 - Add and remove daily habits
-- Track completion on any selected date
+- Mark completion by selected day
 - Automatic streak count per habit
-- Calendar month view with daily progress badges
-- Local persistence using `localStorage`
-- Input validation and user-facing error feedback
-- Minimal modern, responsive UI
+- Calendar month view with completion progress
+- Local persistence (`localStorage` inside the desktop app)
+- Validation and error feedback
 
 ## Project Structure
 
 ```text
 .
-├── index.html
 ├── assets
-│   ├── css
-│   │   └── main.css
-│   └── js
+│   ├── css/main.css
+│   └── js/
 │       ├── constants.js
 │       ├── date-utils.js
 │       ├── dom.js
 │       ├── habit-service.js
 │       ├── main.js
 │       └── storage.js
+├── electron
+│   └── main.cjs
+├── index.html
+├── package.json
 └── README.md
 ```
 
-## Run locally
-
-You can open `index.html` directly, or serve it locally:
+## Run as desktop app (dev)
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm start
 ```
 
-Then open <http://localhost:8000>.
+## Build Windows installer (.exe)
 
-## Design & Engineering Notes
+From your Windows machine:
 
-- Modular JavaScript with separated concerns (state orchestration, storage, domain logic, date helpers, and DOM bindings).
-- Defensive parsing for persisted data.
-- Validation for required/min/max/duplicate habit names.
-- User-facing error feedback for invalid input and storage failures.
-- Accessibility improvements: form label, semantic regions, ARIA labels, and grid roles for calendar cells.
-- No backend or external framework required.
+```bash
+npm install
+npm run dist
+```
+
+The generated installer will be created in the `dist/` folder (NSIS target).
+
+## Notes
+
+- This app is fully local-first and does not require a backend.
+- Habit data is saved per installed app profile on your machine.
