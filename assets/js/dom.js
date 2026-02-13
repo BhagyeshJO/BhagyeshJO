@@ -1,6 +1,8 @@
 export const dom = {
   habitForm: document.getElementById('habit-form'),
   habitInput: document.getElementById('habit-input'),
+  habitInputFeedback: document.getElementById('habit-input-feedback'),
+  appFeedback: document.getElementById('app-feedback'),
   habitList: document.getElementById('habit-list'),
   habitItemTemplate: document.getElementById('habit-item-template'),
   emptyState: document.getElementById('empty-state'),

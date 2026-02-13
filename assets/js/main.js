@@ -1,7 +1,13 @@
 import { CALENDAR_CELL_COUNT } from './constants.js';
 import { dom } from './dom.js';
 import { formatLongDate, formatMonthYear, toISODate } from './date-utils.js';
-import { createHabit, getCompletionCount, getStreakCount, updateHabitCompletion } from './habit-service.js';
+import {
+  createHabit,
+  getCompletionCount,
+  getStreakCount,
+  updateHabitCompletion,
+  validateHabitName,
+} from './habit-service.js';
 import { loadState, saveHabits } from './storage.js';
 
 /**
@@ -21,6 +27,10 @@ function init() {
   const persisted = loadState();
   state.habits = persisted.habits.filter((habit) => habit.name.length > 0);
 
+  if (persisted.error) {
+    showAppFeedback(persisted.error, 'error');
+  }
+
   bindEvents();
   render();
 }
@@ -30,6 +40,7 @@ function bindEvents() {
   dom.habitForm.addEventListener('submit', handleHabitSubmit);
   dom.prevMonthButton.addEventListener('click', () => updateViewMonth(-1));
   dom.nextMonthButton.addEventListener('click', () => updateViewMonth(1));
+  dom.habitInput.addEventListener('input', clearInputFeedback);
 }
 
 /**
@@ -38,13 +49,15 @@ function bindEvents() {
 function handleHabitSubmit(event) {
   event.preventDefault();
 
-  const name = dom.habitInput.value.trim();
-  if (!name) {
+  const validation = validateHabitName(dom.habitInput.value, state.habits);
+  if (!validation.valid) {
+    showInputFeedback(validation.error ?? 'Invalid habit name.');
     return;
   }
 
-  state.habits.push(createHabit(name));
+  state.habits.push(createHabit(validation.normalized));
   dom.habitInput.value = '';
+  clearInputFeedback();
 
   persistAndRender();
 }
@@ -61,7 +74,14 @@ function updateViewMonth(deltaMonth) {
 
 /** Persist habits then render all UI. */
 function persistAndRender() {
-  saveHabits(state.habits);
+  const result = saveHabits(state.habits);
+
+  if (!result.ok) {
+    showAppFeedback(result.error ?? 'Failed to save changes.', 'error');
+  } else {
+    clearAppFeedback();
+  }
+
   render();
 }
 
@@ -83,6 +103,11 @@ function renderHabitList() {
     const metaEl = item.querySelector('.habit-item__meta');
     const checkbox = item.querySelector('.habit-item__checkbox');
     const deleteButton = item.querySelector('.danger-btn');
+
+    if (!nameEl || !metaEl || !checkbox || !deleteButton) {
+      showAppFeedback('Could not render a habit item due to a template issue.', 'error');
+      continue;
+    }
 
     const streak = getStreakCount(habit, state.selectedDate);
 
@@ -161,4 +186,35 @@ function renderCalendar() {
 
     dom.calendarGrid.appendChild(dayButton);
   }
+}
+
+/**
+ * @param {string} message
+ */
+function showInputFeedback(message) {
+  dom.habitInputFeedback.textContent = message;
+  dom.habitInputFeedback.hidden = false;
+  dom.habitInput.classList.add('input--error');
+}
+
+function clearInputFeedback() {
+  dom.habitInputFeedback.textContent = '';
+  dom.habitInputFeedback.hidden = true;
+  dom.habitInput.classList.remove('input--error');
+}
+
+/**
+ * @param {string} message
+ * @param {'error' | 'info'} type
+ */
+function showAppFeedback(message, type = 'info') {
+  dom.appFeedback.textContent = message;
+  dom.appFeedback.hidden = false;
+  dom.appFeedback.classList.toggle('feedback--error', type === 'error');
+}
+
+function clearAppFeedback() {
+  dom.appFeedback.textContent = '';
+  dom.appFeedback.hidden = true;
+  dom.appFeedback.classList.remove('feedback--error');
 }

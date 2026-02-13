@@ -19,7 +19,7 @@
 
       <section class="panel" aria-labelledby="add-habit-title">
         <h2 id="add-habit-title">Add Daily Habit</h2>
-        <form id="habit-form" class="habit-form" autocomplete="off">
+        <form id="habit-form" class="habit-form" autocomplete="off" novalidate>
           <label class="sr-only" for="habit-input">Habit name</label>
           <input
             id="habit-input"
@@ -27,10 +27,12 @@
             type="text"
             maxlength="60"
             placeholder="e.g. Drink 2L water"
+            aria-describedby="habit-input-feedback"
             required
           />
           <button type="submit">Add</button>
         </form>
+        <p id="habit-input-feedback" class="feedback feedback--error" role="alert" hidden></p>
       </section>
 
       <section class="panel" aria-labelledby="today-title">
@@ -39,6 +41,7 @@
           <p id="selected-date-label" class="selected-date-label"></p>
         </div>
 
+        <p id="app-feedback" class="feedback" role="status" hidden></p>
         <ul id="habit-list" class="habit-list" aria-label="Habit list"></ul>
         <p id="empty-state" class="empty-state">No habits yet. Add your first one above.</p>
       </section>
